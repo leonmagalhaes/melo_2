@@ -53,7 +53,7 @@ class AlunoRepository {
         }
 
         if (!row) {
-            // Aluno não encontrado, chama o callback com a mensagem apropriada
+            // Aluno não encontrado
             return callback({ error: 'Aluno não encontrado' });
         }
 
