@@ -5,7 +5,6 @@ class AlunoRepository {
     constructor() {
         this.createTable();
     }
-
     createTable() {
         db.run(`CREATE TABLE IF NOT EXISTS alunos (
             id INTEGER PRIMARY KEY,
@@ -57,15 +56,28 @@ class AlunoRepository {
     }
 
     deletarAluno(id, callback) {
+        // Validar se o ID está vazio
+        if (!id) {
+            return callback({ error: 'O campo ID é obrigatório para deletar um aluno.' });
+        }
+
         const sql = 'DELETE FROM alunos WHERE id=?';
 
         db.run(sql, [id], function(err) {
             if (err) {
                 console.error(err.message);
+                return callback({ error: 'Erro ao deletar aluno do banco de dados.' });
             }
-            callback(`O aluno com id: ${id} foi deletado com sucesso.`);
+
+            // Verificar se alguma linha foi afetada (se o aluno foi encontrado)
+            if (this.changes > 0) {
+                callback({ message: `O aluno com ID ${id} foi deletado com sucesso.` });
+            } else {
+                callback({ error: 'Aluno não encontrado.' });
+            }
         });
     }
 }
+
 
 module.exports = AlunoRepository;

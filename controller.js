@@ -20,10 +20,20 @@ app.get('/alunos', (req, res) => {
 
 app.post('/alunos', (req, res) => {
     const { nome, origem, destino } = req.body;
-    const novoAluno = new Aluno(null, nome, origem, destino);
-    if (!nome || !origem || !destino || nome.trim() === '' || origem.trim() === '' || destino.trim() === '') {
-        return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
+    // Função para validar se uma string contém apenas letras
+    const isValidString = (value) => /^[a-zA-Z\s]+$/.test(value);
+
+    // Validar se algum dos campos está vazio ou não é uma string
+    if (!nome || !origem || !destino || typeof nome !== 'string' || typeof origem !== 'string' || typeof destino !== 'string') {
+        return res.status(400).json({ error: 'Todos os campos são obrigatórios e devem ser strings' });
     }
+
+    // Validar se todos os campos contêm apenas letras
+    if (!isValidString(nome) || !isValidString(origem) || !isValidString(destino)) {
+        return res.status(400).json({ error: 'Todos os campos devem conter apenas letras' });
+    }
+
+    const novoAluno = new Aluno(null, nome, origem, destino);
     alunoRepository.criarAluno(novoAluno, (alunoId) => {
         res.json(`Aluno com o id: ${alunoId} criado com sucesso`);
     });
@@ -50,7 +60,6 @@ app.route('/aluno/:id')
     })
     .delete((req, res) => {
         const { id } = req.params;
-
         alunoRepository.deletarAluno(id, (result) => {
             res.json(result);
         });
