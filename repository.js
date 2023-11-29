@@ -45,14 +45,27 @@ class AlunoRepository {
     }
 
     atualizarAluno(id, nome, origem, destino, callback) {
-        const sql = 'UPDATE alunos SET nome=?, origem=?, destino=? WHERE id=?';
+    // Verificar se o aluno com o ID existe
+    db.get('SELECT * FROM alunos WHERE id = ?', [id], (err, row) => {
+        if (err) {
+            console.error(err.message);
+            return callback({ error: 'Erro ao buscar aluno no banco de dados' });
+        }
 
+        if (!row) {
+            // Aluno não encontrado, chama o callback com a mensagem apropriada
+            return callback({ error: 'Aluno não encontrado' });
+        }
+
+        // Execução da consulta SQL para atualizar os dados no banco de dados
+        const sql = 'UPDATE alunos SET nome=?, origem=?, destino=? WHERE id=?';
         db.run(sql, [nome, origem, destino, id], function(err) {
             if (err) {
                 console.error(err.message);
             }
             callback({ id: id, message: 'Aluno atualizado com sucesso' });
         });
+    });
     }
 
     deletarAluno(id, callback) {

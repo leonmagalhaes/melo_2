@@ -3,6 +3,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const Aluno = require('./model');
 const AlunoRepository = require('./repository');
+const isValidString = (value) => /^[a-zA-ZÀ-ÖØ-öø-ÿ\s]+$/.test(value);
 
 const alunoRepository = new AlunoRepository();
 
@@ -20,9 +21,6 @@ app.get('/alunos', (req, res) => {
 
 app.post('/alunos', (req, res) => {
     const { nome, origem, destino } = req.body;
-    // Função para validar se uma string contém apenas letras
-    const isValidString = (value) => /^[a-zA-Z\s]+$/.test(value);
-
     // Validar se algum dos campos está vazio ou não é uma string
     if (!nome || !origem || !destino || typeof nome !== 'string' || typeof origem !== 'string' || typeof destino !== 'string') {
         return res.status(400).json({ error: 'Todos os campos são obrigatórios e devem ser strings' });
@@ -53,7 +51,20 @@ app.route('/aluno/:id')
     .put((req, res) => {
         const { id } = req.params;
         const { nome, origem, destino } = req.body;
+        // Validar se o ID está vazio
+        if (!id) {
+            return res.status(400).json({ error: 'O campo ID é obrigatório para atualizar um aluno.' });
+        }
 
+        // Validar se algum dos campos está vazio ou não é uma string
+        if (!nome || !origem || !destino || typeof nome !== 'string' || typeof origem !== 'string' || typeof destino !== 'string') {
+            return res.status(400).json({ error: 'Todos os campos são obrigatórios e devem ser strings' });
+        }
+
+        // Validar se todos os campos contêm apenas letras
+        if (!isValidString(nome) || !isValidString(origem) || !isValidString(destino)) {
+            return res.status(400).json({ error: 'Todos os campos devem conter apenas letras' });
+        }
         alunoRepository.atualizarAluno(id, nome, origem, destino, (alunoAtualizado) => {
             res.json(alunoAtualizado);
         });
