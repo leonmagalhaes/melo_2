@@ -21,7 +21,9 @@ app.get('/alunos', (req, res) => {
 app.post('/alunos', (req, res) => {
     const { nome, origem, destino } = req.body;
     const novoAluno = new Aluno(null, nome, origem, destino);
-
+    if (!nome || !origem || !destino || nome.trim() === '' || origem.trim() === '' || destino.trim() === '') {
+        return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
+    }
     alunoRepository.criarAluno(novoAluno, (alunoId) => {
         res.json(`Aluno com o id: ${alunoId} criado com sucesso`);
     });
